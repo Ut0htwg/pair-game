@@ -1,0 +1,87 @@
+body {
+    /* margin: 2rem; */
+    /* padding: 2rem; */
+    /* position: absolute; */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    /* align-items: center; */
+    background-color:lightblue;
+    color: white;
+    /* justify-content: center; */
+}
+
+header {
+    display: block;
+    padding-top: 1rem;
+}
+
+h1, h3 {
+    text-align: center;
+    margin: 1rem auto;
+}
+
+h1 {
+    font-size: 4vh;
+    margin-top: 1vh;
+}
+
+h3 {
+    font-size: 2.5vh;
+}
+
+.clock {
+    font-family: Cyberverse;
+    color: white;
+    font-size: 3.5vh;
+    text-align: center;
+    justify-content: center;
+    width: 12vw;
+    height: 5vh;
+    padding: auto;
+    margin: 1rem auto;
+    /* border: 1px solid #eee; */
+
+}
+
+/* main, section, article, div {
+    border: 1px solid black;
+} */
+
+main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+section {
+    display: flex;
+    flex-direction: row;
+    /* padding: auto; */
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.card {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ff99cc;
+    border-radius: 7px;
+    height: 25vh;
+    width: 9vw;
+    margin: 1rem;
+    padding: .3rem;
+    border: 1px solid #eee;
+/* }
+
+.card-face { */
+    background-image: none;
+    font-size: 7vw;
+}
+
+.card-back {
+    background-image: url('original.jpg');
+    font-size: 0;
+}
