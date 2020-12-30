@@ -1,64 +1,74 @@
 'use strict';
-let startTime = new Date();
+let startTime = 0;
 const stopperFace = document.querySelector('.clock');
 const cardsOfTheGame = document.querySelectorAll('.card');
-const cardFaces = ['&#129409;', '&#128007;', '&#128024;', '&#128056;', '&#128051;'];
+const numberOfCardsPlaying = 9;         // !!!
+const numberOfCardsAvailable = 18;      // !!!
+const cardFaces = 
+        [ '&#129409;', '&#128007;', '&#128024;', '&#128056;', '&#128051;', '&#128010;'
+        , '&#128013;', '&#128034;', '&#128044;', '&#128012;', '&#128060;', '&#128057;'
+        , '&#128053;', '&#128052;', '&#129429;', '&#128025;', '&#128043;', '&#128039;'
+        ];
 let cardArray = [];
 let numberOfCardBacks;
 let cardsOpen;
-let lastCardsFace = ['', ''];
+let currentCardsFace;
+let lastCardsFace;
 let setInt;
-let startAfterFiveSec;
+let clickActive = false;
+let alreadyStarted = false;
 
-
-const handleClick = (event) => {
-    numberOfCardBacks = document.querySelectorAll('.card-back').length;
-    if ( numberOfCardBacks === 0 ) {        // first click (next game)
-        turnBackToFace (event);
-        lastCardsFace [0] = event.target.innerHTML;
-    }
-    numberOfCardBacks = document.querySelectorAll('.card-back').length;
-    if ( numberOfCardBacks === 1 ) {        // last click
-        turnBackToFace (event);             // game over
-        lastCardsFace [1] = event.target.innerHTML;
-        numberOfCardBacks = document.querySelectorAll('.card-back').length;
-
-        const to = setTimeout( () => {
-            clearTimeout(to);
-            beginNewGame();
-        }, 5000);
-    }
-    handleCardsEvents(event);
-}
 
 const turnBackToFace = function (event) {
     event.target.classList.remove('card-back');
+    event.target.classList.add('card-open');
     event.target.removeEventListener('click', handleClick);
 }
 
-const handleCardsEvents = function (event) {
-    cardsOpen = document.querySelectorAll('.card-open');
-    if ( cardsOpen.length === 2) {                             // second card
-        if ( lastCardsFace [0] === lastCardsFace [1] &&
-            lastCardsFace [0] > '' &&  
-            lastCardsFace [1] > '' ) {                         // a pair found
-            cardsToStayFaceUp();
-            lastCardsFace = ['', ''];
-            // return;
+const handleClick = (event) => {
+    if (!clickActive) {
+        clickActive = true;
+        numberOfCardBacks = document.querySelectorAll('.card-back').length;
+        if ( numberOfCardBacks === numberOfCardsAvailable &&
+                !alreadyStarted ) {
+            startTime = 0;
+            alreadyStarted = true;
         }
-        turnTwoCardFacesToBack(event);                   // cards don't match
-        lastCardsFace = ['', ''];
-    } 
-    //      open cards
-    if (lastCardsFace [0] === '') {
-        lastCardsFace [0] = event.target.innerHTML;
-    } else {
-        lastCardsFace [1] = event.target.innerHTML;
+        turnBackToFace(event);
+        firstCardSecondCard(event);
     }
-    turnBackToFace (event);
-    event.target.classList.add('card-open');
-    // cardsOpen = document.querySelectorAll('.card-open');
-    // console.log(cardsOpen.length);
+}
+
+const firstCardSecondCard = (event) => {
+    numberOfCardBacks = document.querySelectorAll('.card-back').length;
+    if (numberOfCardBacks % 2 === 0) {      //second card of two cards
+        handleCardsEvents(event);
+        lastCardsFace = '';
+        if ( numberOfCardBacks === 0 ) {
+            const to = setTimeout( () => {
+                clearTimeout(to);
+                clickActive = false;
+                beginNewGame();
+            }, 5000);
+        }
+    } else {                                // first card of two cards
+        lastCardsFace = event.target.innerHTML;
+        clickActive = false;
+    }
+}
+
+const handleCardsEvents = function (event) {
+    currentCardsFace = event.target.innerHTML;
+    if(lastCardsFace === currentCardsFace) {
+        cardsToStayFaceUp();
+        clickActive = false;
+    } else {
+        const turn = setTimeout( () => {
+            turnTwoCardFacesToBack(event);
+            clearTimeout(turn);
+            clickActive = false;
+        }, 2000);
+    }
 }
 
 const cardsToStayFaceUp = function (event) {
@@ -75,16 +85,6 @@ const turnTwoCardFacesToBack = function (event) {
         element.classList.remove('card-open');
         element.addEventListener('click', handleClick);
     });
-
-}
-
-const initializeCardsOfTheGame = function (cardFaces) {
-    cardArray = cardFaces;
-    cardArray = cardArray.concat(cardArray);
-    cardArray = shufleCardArray(cardArray);
-    addListener();
-    addPictures();
-    return cardArray;
 }
 
 const addListener = () => {
@@ -98,7 +98,6 @@ const addPictures = () => {
     cardsOfTheGame.forEach(element => {
         element.innerHTML = cardArray[i];
         element.classList.add('card-back');
-        element.classList.remove('card-open');
         i+=1;
     });
 }
@@ -120,9 +119,28 @@ const shufleCardArray = function (array) {
     return array;
 }
 
+const deleteHalfOfItRandomly = (array) => {
+    let i = numberOfCardsAvailable;
+    while (i > numberOfCardsPlaying) {
+        let randomIndex = Math.floor(Math.random() * i );
+        array.splice(randomIndex, 1);
+        i = array.length;
+    };
+    return array;
+}
+
+const initializeCardsOfTheGame = (array) => {
+    cardArray = array.slice();
+    cardArray = deleteHalfOfItRandomly(cardArray);
+    cardArray = cardArray.concat(cardArray);
+    cardArray = shufleCardArray(cardArray);
+    addListener();
+    addPictures();
+    return cardArray;
+}
+
 const showTime = function () {
-    let elapsedTime = new Date() - startTime;
-    elapsedTime /= 1000;
+    let elapsedTime = startTime;
     let min = Math.floor(elapsedTime / 60);
     let sec = Math.floor(elapsedTime % 60);
     const timeMin = min < 10 ? `0${min}` : `${min}`;
@@ -132,23 +150,20 @@ const showTime = function () {
 }
 
 const beginNewGame = function () {
-    
-    cardArray = initializeCardsOfTheGame (cardFaces);
-    startTime = new Date();
+    alreadyStarted = false;
+    const cardWork = cardFaces.slice();
+    cardArray = initializeCardsOfTheGame (cardWork);
+    startTime = 0;
     setInt = setInterval(measureTime, 1000);
 
     function measureTime () {
         showTime();
+        startTime += 1;
         numberOfCardBacks = document.querySelectorAll('.card-back').length;
         if ( numberOfCardBacks === 0 ) {        // game over
             clearInterval(setInt);
         }
     }
-    
 }
 
-const clockClick = function () {beginNewGame();};
-stopperFace.addEventListener('click', clockClick);
-
 beginNewGame();
-
